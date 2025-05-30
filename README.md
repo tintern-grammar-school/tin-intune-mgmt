@@ -1,5 +1,5 @@
 # tintune-mgmt
-This repository holds our Intune (or *"Tintune"*, get it? 🙂) Management Scripts. Just like it says on the can, most of these scripts have come about as a way to automate or streamline various repeatable actions that happen in the course of managing our environment.
+This repository holds our Intune (or is it *"Tintune"*... get it? 🙂) Management Scripts. Just like it says on the can, most of these scripts have come about as a way to automate or streamline various repeatable actions that happen in the course of managing our environment.
 
 We are a mixed Windows / iPadOS / macOS environment. Suggestions and improvements welcome!
 
