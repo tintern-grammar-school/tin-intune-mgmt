@@ -3,6 +3,9 @@ This repository holds our Intune (or is it *"Tintune"*... get it? 🙂) Manageme
 
 We are a mixed Windows / iPadOS / macOS environment. Suggestions and improvements welcome!
 
+> [!NOTE]
+> Many of the scripts here require custom functions that are included in our (PowerShell Library)[https://github.com/johnclearytintern/tin-pwsh-library].
+
 > [!IMPORTANT]
 >
 > Our school has benefited greatly from other people's open source projects over the years, and values contributing to the broader community. In this spirit we have open-source licenced this project.
