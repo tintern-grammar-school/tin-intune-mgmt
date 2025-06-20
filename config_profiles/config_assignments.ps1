@@ -148,7 +148,7 @@ if (-not $indexed_policies) {
 
 
 ## TO DO
-## Loop throught every policy and get the assignments for each, and populate one big object with all of them.
+## Loop through every policy and get the assignments for each, and populate one big object with all of them.
 
 
 
