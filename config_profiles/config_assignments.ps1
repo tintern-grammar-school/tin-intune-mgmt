@@ -21,6 +21,9 @@ function Get-PolicyDetails {
 	    "Compliance" {
 			$assignments = Get-MgBetaDeviceManagementDeviceCompliancePolicyAssignment -DeviceCompliancePolicyId $selected_policy.Id | Select-Object *, @{ Name = 'assign_or_exclude'; Expression = { $_.Target.AdditionalProperties['@odata.type'] -replace '#microsoft.graph.groupAssignmentTarget', 'Assigned Group' -replace '#microsoft.graph.exclusionGroupAssignmentTarget', 'Excluded Group' -replace '#microsoft.graph.allDevicesAssignmentTarget', 'Assigned All Devices'} } # Compliance
 	    }
+	    "GPO" {
+			$assignments = Get-MgBetaDeviceManagementGroupPolicyConfigurationAssignment -GroupPolicyConfigurationId $selected_policy.Id | Select-Object *, @{ Name = 'assign_or_exclude'; Expression = { $_.Target.AdditionalProperties['@odata.type'] -replace '#microsoft.graph.groupAssignmentTarget', 'Assigned Group' -replace '#microsoft.graph.exclusionGroupAssignmentTarget', 'Excluded Group' -replace '#microsoft.graph.allDevicesAssignmentTarget', 'Assigned All Devices'} } # Compliance
+	    }
 	    default {
 	        Write-TnLogMessage "Unknown config type: $($selected_policy.ConfigType)"
 	        continue
@@ -96,18 +99,26 @@ $platformTypeMap = @{
 ##     Expression = { $_.AdditionalProperties['@odata.type'] -replace '#microsoft.graph.', '' }
 ## }
 
-$legacy_policies = Get-MgBetaDeviceManagementDeviceConfiguration -Property * | Select-Object *, @{ Name = 'Platform'; Expression = { $_.AdditionalProperties['@odata.type'] -replace '#microsoft.graph.', '' } }, @{Name = 'ConfigType'; Expression = { "Legacy" }}
+$legacy_policies = Get-MgBetaDeviceManagementDeviceConfiguration -All -Property * | Select-Object *, @{ Name = 'Platform'; Expression = { $_.AdditionalProperties['@odata.type'] -replace '#microsoft.graph.', '' } }, @{Name = 'ConfigType'; Expression = { "Legacy" }}
 
-$modern_policies = Get-MgBetaDeviceManagementConfigurationPolicy -Property * | Select-Object *,`
+$modern_policies = Get-MgBetaDeviceManagementConfigurationPolicy -All -Property * | Select-Object *,`
     @{Name = 'DisplayName'; Expression = { $_.Name }},  # Rename 'Name' → 'DisplayName'
     @{Name = 'Platform'; Expression = { $_.Platforms }},
     @{Name = 'ConfigType'; Expression = { "Modern" }}
 
-$compliance_policies = Get-MgBetaDeviceManagementDeviceCompliancePolicy -Property * | Select-Object *, @{ Name = 'Platform'; Expression = { $_.AdditionalProperties['@odata.type'] -replace '#microsoft.graph.', '' } }, @{Name = 'ConfigType'; Expression = { "Compliance" }}
+$compliance_policies = Get-MgBetaDeviceManagementDeviceCompliancePolicy -All -Property * | Select-Object *, @{ Name = 'Platform'; Expression = { $_.AdditionalProperties['@odata.type'] -replace '#microsoft.graph.', '' } }, @{Name = 'ConfigType'; Expression = { "Compliance" }}
+
+$gpo_policies = Get-MgBetaDeviceManagementGroupPolicyConfiguration -All -Property * | Select-Object *, @{ Name = 'Platform'; Expression = { "windows" } }, @{Name = 'ConfigType'; Expression = { "GPO" }}
 
 ## (Get-MgBetaDeviceManagementDeviceCompliancePolicy -DeviceCompliancePolicyId f5ab30ad-86b9-44cd-b6ab-f3efee8e7d26).AdditionalProperties | format-list
 
-$all_policies = $legacy_policies + $modern_policies + $compliance_policies
+$all_policies = $legacy_policies + $modern_policies + $compliance_policies + $gpo_policies
+
+Write-TnField -title "Legacy Policies" -value $($legacy_policies).count
+Write-TnField -title "Modern Policies" -value $($modern_policies).count
+Write-TnField -title "Compliance Policies" -value $($compliance_policies).count
+Write-TnField -title "GPO Policies" -value $($gpo_policies).count
+Write-TnField -title "Total Policies" -value $($all_policies).count
 
 $indexed_policies = @()
 $i = 1
@@ -139,6 +150,8 @@ foreach ($policy in $all_policies | Sort-Object Platform, DisplayName) {
 }
 
 $indexed_policies | Format-Table Index, Platform, ConfigType, Name, Id
+
+Write-TnField -title "Total Policies" -value $($indexed_policies).count
 
 if (-not $indexed_policies) {
     Write-TnLogMessage "No policies found for $Platform"
