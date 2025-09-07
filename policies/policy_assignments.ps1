@@ -46,9 +46,9 @@ function Get-PolicyDetails {
 
 			$groupId = $a.Target.additionalproperties['groupId']
 		
-	        $group = Get-MgBetaGroup -GroupId $groupId -ErrorAction SilentlyContinue
+	        $group = Get-MgGroup -GroupId $groupId -ErrorAction SilentlyContinue
 	        $groupName = if ($group.DisplayName) { $group.DisplayName } else { "Unknown group ($groupId)" }
-			$group_members = (Get-MgBetaGroupMember -GroupId $groupId).AdditionalProperties.userPrincipalName	# doesn't get nested groups yet
+			$group_members = (Get-MgGroupMember -GroupId $groupId).AdditionalProperties.userPrincipalName	# doesn't get nested groups yet
 
 	        Write-TnField -title "Assigned to" -value "$groupName [$groupId]"
 	        Write-TnField -title "Group Members" -value "$group_members"
@@ -81,7 +81,7 @@ function Get-PolicyDetails {
 Write-TnLogMessage "Note: this script uses the MgGraph *Beta* Endpoints, as these features are not complete in the standard version which will return limited results."
 
 Import-Module Microsoft.Graph.Beta.DeviceManagement
-Import-Module Microsoft.Graph.Beta.Groups
+Import-Module Microsoft.Graph.Groups
 Import-Module Tintern -DisableNameChecking -Force
 
 $connect_MgGraph = Connect-MgGraph -Scopes "DeviceManagementConfiguration.Read.All", "Group.Read.All", "User.Read.All"
